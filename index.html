@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAEMATH 2214 - Numerical Analysis</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div class="main-wrapper">
+        
+        <div class="auth-container">
+            <header class="auth-header">
+                <h1>MAEMATH 2214</h1>
+                <h2 style="color: #2b6cb0;">Numerical Analysis Portal</h2>
+                <p>Master of Arts in Education Major in Mathematics</p>
+            </header>
+
+            <div id="login-section" class="form-section">
+                <h3>Login</h3>
+                <form id="login-form">
+                    <div class="input-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required placeholder="Enter your email">
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn primary-btn">Login</button>
+                </form>
+                <p class="toggle-text">
+                    Don't have an account? <button type="button" class="btn-link" id="show-register">Register here</button>
+                </p>
+            </div>
+
+            <div id="register-section" class="form-section" style="display: none;">
+                <h3 style="color: #2c5282;">Create an Account</h3>
+                <p style="font-size: 0.8rem; color: #718096; margin-bottom: 15px;">
+                    ⚠️ Note: You must use your name as listed in the official class record.
+                </p>
+                
+                <form id="register-form">
+                    <div class="input-group">
+                        <label for="register-full-name">Official Full Name</label>
+                        <input type="text" id="register-full-name" required 
+                               placeholder="e.g., SURNAME, FIRST NAME M." 
+                               style="text-transform: uppercase;">
+                    </div>
+                    <div class="input-group">
+                        <label for="register-email">Email Address</label>
+                        <input type="email" id="register-email" required placeholder="Use your active email">
+                    </div>
+                    <div class="input-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required placeholder="Minimum 6 characters">
+                    </div>
+                    <button type="submit" class="btn primary-btn">Register Account</button>
+                </form>
+                
+                <p class="toggle-text">
+                    Already registered? <button type="button" class="btn-link" id="show-login">Back to Login</button>
+                </p>
+            </div>
+
+            <div id="auth-message" class="message-box"></div>
+
+        </div> </div> <script type="module" src="js/auth.js"></script>
+    <script src="js/footer.js"></script>
+</body>
+</html>

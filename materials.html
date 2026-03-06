@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materials & Uploads - MAEMATH 2214</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script type="module" src="js/guard.js"></script>
+</head>
+<body class="dashboard-body">
+
+    <nav class="navbar">
+    <div class="nav-brand">MAEMATH 2214</div>
+    <ul class="nav-links">
+        <li><a href="dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="materials.html">Materials</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="chat.html">Chat</a></li> 
+    </ul>
+    <button id="logout-btn" class="btn-outline">Logout</button>
+    </nav>
+
+    <main class="dashboard-container">
+        <header class="page-header">
+            <h1>Class Materials</h1>
+            <p>Upload and download presentations, PDFs, and documents.</p>
+        </header>
+
+        <div class="dashboard-grid">
+            
+            <section class="card">
+                <div class="card-header">
+                    <h2>📤 Upload a File</h2>
+                </div>
+                <div class="card-content">
+                    <form id="upload-form">
+                        <div class="input-group">
+                            <label for="file-title">Document Title</label>
+                            <input type="text" id="file-title" required placeholder="e.g., Chapter 3 - Roots of Equations">
+                        </div>
+                        <div class="input-group">
+                            <label for="file-input">Select File</label>
+                            <input type="file" id="file-input" required accept=".pdf,.doc,.docx,.ppt,.pptx">
+                        </div>
+                        <button type="submit" class="btn primary-btn" id="upload-btn">Upload File</button>
+                        <div id="upload-message" class="message-box" style="margin-top: 10px; font-weight: bold;"></div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <h2>📚 Shared Materials</h2>
+                </div>
+                <div id="materials-container" class="card-content">
+                    <p class="loading-text">Loading materials...</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script type="module" src="js/materials.js"></script>
+    <script src="js/footer.js"></script>
+
+</body>
+</html>

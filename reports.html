@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Reports - MAEMATH 2214</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script type="module" src="js/guard.js"></script>
+    
+    <style>
+        /* Styles for the pop-up modal */
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe; margin: 10% auto; padding: 20px;
+            border: 1px solid #888; width: 90%; max-width: 500px; border-radius: 8px;
+        }
+        .close-btn {
+            color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;
+        }
+        .close-btn:hover { color: black; }
+    </style>
+</head>
+<body class="dashboard-body">
+
+    <nav class="navbar">
+    <div class="nav-brand">MAEMATH 2214</div>
+    <ul class="nav-links">
+        <li><a href="dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="materials.html">Materials</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="chat.html">Chat</a></li> 
+    </ul>
+    <button id="logout-btn" class="btn-outline">Logout</button>
+    </nav>
+
+    <main class="dashboard-container">
+        <header class="page-header">
+            <h1>Group Reports & Syllabus</h1>
+            <p>Topics, member assignments, and project requirements.</p>
+        </header>
+
+        <section class="card" style="border-left: 5px solid #2b6cb0; background-color: #ebf8ff; margin-bottom: 2rem;">
+            <div class="card-content">
+                <h2 style="color: #2b6cb0; margin-bottom: 1rem;">📌 Course Requirements</h2>
+                <ul style="line-height: 1.6; padding-left: 20px;">
+                    <li><strong>Individual PPT presentation</strong> of the topics assigned by the group leader.</li>
+                    <li><strong>Questions and answers</strong> after the presentation, individually or in groups.</li>
+                    <li><strong>Proposed Action Plan / Teaching Guide</strong> per group.</li>
+                    <li><strong>Final Exam:</strong> Send your final exam to the professor's email or FB Messenger.</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="dashboard-grid" id="groups-container">
+            <p>Loading syllabus and submissions...</p>
+        </div>
+
+    </main>
+
+    <div id="upload-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-modal">&times;</span>
+            <h2 style="margin-bottom: 15px; color: #1a365d;">Submit Individual Report</h2>
+            <p style="margin-bottom: 15px; color: #4a5568;">Uploading for: <strong id="modal-student-name"></strong></p>
+            
+            <form id="report-upload-form">
+                <input type="hidden" id="hidden-student-name">
+                <input type="hidden" id="hidden-group-number">
+                
+                <div class="input-group">
+                    <label for="sub-topic">Your Specific Sub-Topic</label>
+                    <input type="text" id="sub-topic" required placeholder="e.g., The Bisection Method">
+                </div>
+                
+                <div class="input-group">
+                    <label for="report-description">Short Description / Notes</label>
+                    <textarea id="report-description" required rows="3" placeholder="Briefly describe what your report covers..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="report-file">Presentation File</label>
+                    <input type="file" id="report-file" required accept=".pdf,.ppt,.pptx,.doc,.docx">
+                </div>
+
+                <button type="submit" class="btn primary-btn" id="submit-report-btn" style="width: 100%;">Upload Report</button>
+                <div id="modal-message" class="message-box" style="margin-top: 10px; font-weight: bold;"></div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/reports.js"></script>
+    <script src="js/footer.js"></script>
+
+</body>
+</html>

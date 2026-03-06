@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - MAEMATH 2214</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script type="module" src="js/guard.js"></script>
+</head>
+<body class="dashboard-body">
+
+   <nav class="navbar">
+    <div class="nav-brand">MAEMATH 2214</div>
+    <ul class="nav-links">
+        <li><a href="dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="materials.html">Materials</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="chat.html">Chat</a></li> 
+    </ul>
+    <button id="logout-btn" class="btn-outline">Logout</button>
+    </nav>
+
+    <main class="dashboard-container">
+        <header class="page-header">
+    <h1>Welcome back, <span id="user-email-display">Student</span>! 👋</h1>
+    <p>Here is your class overview for today.</p>
+</header>
+
+        <div class="dashboard-grid">
+            
+            <section class="card">
+                <div class="card-header" style="background-color: #2b6cb0; color: white;">
+                    <h2>📢 Class Announcements</h2>
+                </div>
+                <div class="card-content">
+                    <div id="admin-announcement-box" style="display: none; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px dashed #e2e8f0;">
+                        <textarea id="announcement-text" rows="3" placeholder="Post a new announcement..." style="width: 100%; margin-bottom: 10px;"></textarea>
+                        <button id="post-announcement-btn" class="btn primary-btn">Post Announcement</button>
+                    </div>
+                    
+                    <div id="announcements-container">Loading...</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header" style="background-color: #38a169; color: white;">
+                    <h2>📅 Upcoming Meetings</h2>
+                </div>
+                <div class="card-content">
+                    <div id="admin-meeting-box" style="display: none; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px dashed #e2e8f0;">
+                        <input type="text" id="meeting-title" placeholder="Meeting Title (e.g., Midterm Review)" style="margin-bottom: 10px; width: 100%;">
+                        <input type="text" id="meeting-time" placeholder="Date & Time (e.g., Friday @ 6:00 PM)" style="margin-bottom: 10px; width: 100%;">
+                        <input type="text" id="meeting-link" placeholder="Zoom/Meet Link" style="margin-bottom: 10px; width: 100%;">
+                        <button id="post-meeting-btn" class="btn primary-btn" style="background-color: #38a169;">Post Meeting</button>
+                    </div>
+
+                    <div id="meetings-container">Loading...</div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script type="module" src="js/dashboard.js"></script>
+    <script src="js/footer.js"></script>
+</body>
+</html>
