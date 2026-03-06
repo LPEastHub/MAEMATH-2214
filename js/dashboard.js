@@ -13,7 +13,7 @@ const meetingsContainer = document.getElementById('meetings-container');
 async function initDashboard() {
     const { data: { user } } = await supabase.auth.getUser();
     
-    // --- NEW: FIRST NAME EXTRACTION LOGIC ---
+    // --- FIRST NAME EXTRACTION LOGIC ---
     let displayName = user.email.split('@')[0]; // Default fallback
     const rawFullName = user.user_metadata?.full_name;
 
@@ -50,11 +50,16 @@ async function initDashboard() {
 // LOAD DATA
 async function loadAnnouncements() {
     const { data } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
-    if (!data || data.length === 0) return announcementsContainer.innerHTML = '<p style="color: gray;">No announcements yet.</p>';
     
+    if (!data || data.length === 0) {
+        announcementsContainer.innerHTML = '<p style="color: gray;">No announcements yet.</p>';
+        return;
+    }
+    
+    // Added "white-space: pre-wrap;" to preserve spacing, indentations, and line breaks!
     announcementsContainer.innerHTML = data.map(a => `
         <div style="background: #ebf8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3182ce; margin-bottom: 15px;">
-            <p style="margin: 0; color: #1a365d;">${a.content}</p>
+            <p style="margin: 0; color: #1a365d; white-space: pre-wrap; font-family: inherit;">${a.content}</p>
             <small style="color: #718096; font-size: 0.8rem; display: block; margin-top: 8px;">Posted: ${new Date(a.created_at).toLocaleDateString()}</small>
         </div>
     `).join('');
@@ -62,7 +67,11 @@ async function loadAnnouncements() {
 
 async function loadMeetings() {
     const { data } = await supabase.from('meetings').select('*').order('created_at', { ascending: false });
-    if (!data || data.length === 0) return meetingsContainer.innerHTML = '<p style="color: gray;">No scheduled meetings.</p>';
+    
+    if (!data || data.length === 0) {
+        meetingsContainer.innerHTML = '<p style="color: gray;">No scheduled meetings.</p>';
+        return;
+    }
 
     meetingsContainer.innerHTML = data.map(m => `
         <div style="background: #f0fff4; padding: 15px; border-radius: 8px; border-left: 4px solid #38a169; margin-bottom: 15px;">
@@ -75,24 +84,54 @@ async function loadMeetings() {
 
 // POST NEW DATA (Admin Only)
 document.getElementById('post-announcement-btn')?.addEventListener('click', async () => {
+    // 1. Get the currently logged-in user to grab their ID
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const text = document.getElementById('announcement-text').value;
     if (!text) return;
-    await supabase.from('announcements').insert([{ content: text }]);
-    document.getElementById('announcement-text').value = '';
-    loadAnnouncements();
+    
+    // 2. Insert BOTH the content AND the author_id (Fixed the 400 Error!)
+    const { error } = await supabase.from('announcements').insert([{ 
+        content: text, 
+        author_id: user.id 
+    }]);
+
+    if (error) {
+        console.error("Supabase Error:", error);
+        alert("Failed to post. Check the console for details.");
+    } else {
+        document.getElementById('announcement-text').value = '';
+        loadAnnouncements();
+    }
 });
 
 document.getElementById('post-meeting-btn')?.addEventListener('click', async () => {
+    // 1. Get the current user here too
+    const { data: { user } } = await supabase.auth.getUser();
+
     const title = document.getElementById('meeting-title').value;
     const time = document.getElementById('meeting-time').value;
     const link = document.getElementById('meeting-link').value;
+    
     if (!title || !time || !link) return alert("Please fill all meeting fields");
     
-    await supabase.from('meetings').insert([{ title: title, schedule: time, link: link }]);
-    document.getElementById('meeting-title').value = '';
-    document.getElementById('meeting-time').value = '';
-    document.getElementById('meeting-link').value = '';
-    loadMeetings();
+    // 2. Insert the meeting details, including the author_id
+    const { error } = await supabase.from('meetings').insert([{ 
+        title: title, 
+        schedule: time, 
+        link: link,
+        author_id: user.id
+    }]);
+
+    if (error) {
+        console.error("Supabase Error:", error);
+        alert("Failed to post meeting. Check the console for details.");
+    } else {
+        document.getElementById('meeting-title').value = '';
+        document.getElementById('meeting-time').value = '';
+        document.getElementById('meeting-link').value = '';
+        loadMeetings();
+    }
 });
 
 document.getElementById('logout-btn')?.addEventListener('click', async () => {

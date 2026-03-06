@@ -10,10 +10,26 @@
 
     <div class="main-wrapper">
         
+        <div id="privacy-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🔒 Data Privacy Consent</h2>
+                </div>
+                <div class="modal-body">
+                    <p>Welcome to the MAEMATH 2214 Portal.</p>
+                    <p>By proceeding and registering an account, you consent to the collection and processing of your personal data (Official Name and Email Address) strictly for academic, communication, and administrative purposes in accordance with the <strong>Data Privacy Act of 2012 (RA 10173)</strong>.</p>
+                    <p>Your information will be securely stored and accessible only to the class administrator.</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="https://google.com" class="btn btn-outline" style="text-decoration: none; text-align: center;">Decline & Leave</a>
+                    <button id="accept-privacy" class="btn primary-btn">I Agree</button>
+                </div>
+            </div>
+        </div>
         <div class="auth-container">
             <header class="auth-header">
                 <h1>MAEMATH 2214</h1>
-                <h2 style="color: #2b6cb0;">Numerical Analysis Portal</h2>
+                <h2 style="color: var(--primary-blue);">Numerical Analysis Portal</h2>
                 <p>Master of Arts in Education Major in Mathematics</p>
             </header>
 
@@ -36,8 +52,8 @@
             </div>
 
             <div id="register-section" class="form-section" style="display: none;">
-                <h3 style="color: #2c5282;">Create an Account</h3>
-                <p style="font-size: 0.8rem; color: #718096; margin-bottom: 15px;">
+                <h3 style="color: var(--dark-blue);">Create an Account</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">
                     ⚠️ Note: You must use your name as listed in the official class record.
                 </p>
                 
@@ -68,5 +84,29 @@
 
         </div> </div> <script type="module" src="js/auth.js"></script>
     <script src="js/footer.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const privacyModal = document.getElementById('privacy-modal');
+            const acceptBtn = document.getElementById('accept-privacy');
+
+            // Check if the user has already accepted the privacy policy
+            const hasAccepted = localStorage.getItem('maemath_privacy_accepted');
+
+            if (!hasAccepted) {
+                // If not accepted, show the modal
+                privacyModal.style.display = 'flex';
+            }
+
+            // When they click "I Agree"
+            acceptBtn.addEventListener('click', () => {
+                localStorage.setItem('maemath_privacy_accepted', 'true');
+                privacyModal.style.opacity = '0';
+                setTimeout(() => {
+                    privacyModal.style.display = 'none';
+                }, 300);
+            });
+        });
+    </script>
 </body>
 </html>
