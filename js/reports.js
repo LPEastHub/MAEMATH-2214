@@ -82,7 +82,7 @@ async function loadGroups() {
     const subsList = submissions || [];
 
     groupsContainer.innerHTML = classGroups.map(group => `
-        <section class="card" style="margin-bottom: 2rem;">
+        <section class="card" style="height: 100%; display: flex; flex-direction: column;">
             <div class="card-header" style="background-color: #1a365d; color: white; padding: 15px;">
                 <h2 style="margin: 0;">Group ${group.number}: ${group.topic}</h2>
             </div>

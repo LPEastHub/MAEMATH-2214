@@ -38,39 +38,71 @@ async function loadMessages() {
         .limit(50);
 
     if (error) {
-        chatWindow.innerHTML = `<p>Error loading messages: ${error.message}</p>`;
+        chatWindow.innerHTML = `<p style="text-align: center; color: #e53e3e;">Error loading messages: ${error.message}</p>`;
         return;
     }
 
     chatWindow.innerHTML = ''; // Clear loading text
-    data.forEach(msg => renderSingleMessage(msg));
-    scrollToBottom();
+    
+    if (data.length === 0) {
+        chatWindow.innerHTML = `<p style="text-align: center; color: #94a3b8; font-size: 0.9rem; margin-top: 20px;">No messages yet. Start the conversation!</p>`;
+    } else {
+        data.forEach(msg => renderSingleMessage(msg));
+        scrollToBottom();
+    }
 }
 
 function renderSingleMessage(msg) {
     const isMine = msg.sender_email === currentUserEmail;
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `message ${isMine ? 'mine' : 'others'}`;
     
-    msgDiv.innerHTML = `
-        <span class="message-info">${isMine ? 'You' : msg.sender_name}</span>
-        <div>${msg.content}</div>
+    // Format the timestamp to a readable format (e.g., 2:30 PM)
+    let timeString = '';
+    if (msg.created_at) {
+        const date = new Date(msg.created_at);
+        timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    const wrapperDiv = document.createElement('div');
+    wrapperDiv.className = `message-wrapper ${isMine ? 'mine' : 'others'}`;
+    
+    const senderName = isMine ? 'You' : msg.sender_name;
+    
+    // Build the new structure: Info on top, bubble on the bottom
+    wrapperDiv.innerHTML = `
+        <div class="message-info">
+            <strong>${senderName}</strong>
+            <span style="opacity: 0.7; font-weight: normal;">${timeString}</span>
+        </div>
+        <div class="message">${msg.content}</div>
     `;
     
-    chatWindow.appendChild(msgDiv);
+    chatWindow.appendChild(wrapperDiv);
 }
 
 function scrollToBottom() {
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-// Sending a message
+// Explicitly handle the "Enter" key
+messageInput.addEventListener('keydown', (e) => {
+    // Check if the key pressed is "Enter"
+    if (e.key === 'Enter') {
+        e.preventDefault(); // Stop any default browser behavior
+        chatForm.dispatchEvent(new Event('submit')); // Trigger the form submission
+    }
+});
+
+// Handle the actual sending logic
 chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const content = messageInput.value.trim();
     if (!content) return;
 
+    // Clear the input immediately for UI responsiveness
     messageInput.value = '';
+    
+    // Auto-focus back on the input so the user can keep typing immediately
+    messageInput.focus();
 
     const { error } = await supabase.from('messages').insert([
         { 
