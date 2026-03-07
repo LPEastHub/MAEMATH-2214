@@ -1,53 +1,62 @@
 // js/dashboard.js
 import { supabase } from './supabaseClient.js';
 
-// 👉 Change this to match the admin email exactly!
+// 👉 EXACT admin email address
 const ADMIN_EMAIL = 'gerothornz05@gmail.com';
 
+// UI Elements
 const userDisplay = document.getElementById('user-email-display');
+const adminPanel = document.getElementById('admin-panel');
 const adminAnnounceBox = document.getElementById('admin-announcement-box');
 const adminMeetingBox = document.getElementById('admin-meeting-box');
+const adminVideoBox = document.getElementById('admin-video-box');
+
 const announcementsContainer = document.getElementById('announcements-container');
 const meetingsContainer = document.getElementById('meetings-container');
+const videosContainer = document.getElementById('videos-container');
 
+// --- INITIALIZE DASHBOARD ---
 async function initDashboard() {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    // --- FIRST NAME EXTRACTION LOGIC ---
-    let displayName = user.email.split('@')[0]; // Default fallback
+    // 1. Check if user is actually logged in
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+        window.location.replace('index.html');
+        return;
+    }
+
+    const user = session.user;
+
+    // 2. Format the user's First Name
+    let displayName = user.email.split('@')[0]; 
     const rawFullName = user.user_metadata?.full_name;
 
     if (rawFullName && rawFullName.includes(',')) {
-        // Example: "ERA, DINO ANTHONY M." -> " DINO ANTHONY M."
         const afterComma = rawFullName.split(',')[1].trim(); 
-        
-        // "DINO ANTHONY M." -> "DINO"
         const firstWord = afterComma.split(' ')[0]; 
-        
-        // "DINO" -> "Dino"
         displayName = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
     } else if (rawFullName) {
-        // Just in case someone bypassed the comma format
         const firstWord = rawFullName.split(' ')[0];
         displayName = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
     }
 
-    // Set the welcome text to the shiny new first name
-    if (userDisplay) {
-        userDisplay.textContent = displayName;
-    }
+    if (userDisplay) userDisplay.textContent = displayName;
 
-    // Show hidden admin tools if the logged in user is the professor
+    // 3. Show Admin Tools if email matches
     if (user.email === ADMIN_EMAIL) {
+        if (adminPanel) adminPanel.style.display = 'block';
         if (adminAnnounceBox) adminAnnounceBox.style.display = 'block';
         if (adminMeetingBox) adminMeetingBox.style.display = 'block';
+        if (adminVideoBox) adminVideoBox.style.display = 'block';
     }
 
+    // 4. Load all the data
     loadAnnouncements();
     loadMeetings();
+    loadVideos();
 }
 
-// LOAD DATA
+// --- LOAD DATA FUNCTIONS ---
+
 async function loadAnnouncements() {
     const { data } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
     
@@ -56,11 +65,11 @@ async function loadAnnouncements() {
         return;
     }
     
-    // Added "white-space: pre-wrap;" to preserve spacing, indentations, and line breaks!
+    // Using white-space: pre-wrap to keep paragraph spaces and indentations!
     announcementsContainer.innerHTML = data.map(a => `
         <div style="background: #ebf8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3182ce; margin-bottom: 15px;">
-            <p style="margin: 0; color: #1a365d; white-space: pre-wrap; font-family: inherit;">${a.content}</p>
-            <small style="color: #718096; font-size: 0.8rem; display: block; margin-top: 8px;">Posted: ${new Date(a.created_at).toLocaleDateString()}</small>
+            <p style="margin: 0; color: #1a365d; white-space: pre-wrap; font-family: inherit; line-height: 1.5;">${a.content}</p>
+            <small style="color: #718096; font-size: 0.8rem; display: block; margin-top: 10px;">Posted: ${new Date(a.created_at).toLocaleDateString()}</small>
         </div>
     `).join('');
 }
@@ -77,56 +86,56 @@ async function loadMeetings() {
         <div style="background: #f0fff4; padding: 15px; border-radius: 8px; border-left: 4px solid #38a169; margin-bottom: 15px;">
             <h3 style="margin: 0 0 5px 0; color: #22543d;">${m.title}</h3>
             <p style="margin: 0 0 10px 0; color: #2f855a; font-weight: bold;">⏰ ${m.schedule}</p>
-            <a href="${m.link}" target="_blank" class="btn primary-btn" style="background-color: #38a169; text-decoration: none; padding: 5px 15px; font-size: 0.9rem;">Join Meeting</a>
+            <a href="${m.link}" target="_blank" style="display: inline-block; background-color: #38a169; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; font-size: 0.9rem;">Join Meeting</a>
         </div>
     `).join('');
 }
 
-// POST NEW DATA (Admin Only)
+async function loadVideos() {
+    const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
+
+    if (!data || data.length === 0) {
+        videosContainer.innerHTML = '<p style="color: gray;">No videos posted yet.</p>';
+        return;
+    }
+
+    videosContainer.innerHTML = data.map(v => `
+        <div style="border-left: 4px solid #805ad5; padding-left: 15px; margin-bottom: 20px; background-color: #faf5ff; padding: 15px; border-radius: 8px;">
+            <strong style="font-size: 1.1em; color: #44337a;">${v.title}</strong><br>
+            <a href="${v.video_url}" target="_blank" style="color: #6b46c1; font-weight: bold; text-decoration: none; display: inline-block; margin: 10px 0;">🔗 Click here to watch</a><br>
+            <small style="color: #718096;">Posted by ${v.author_name} on ${new Date(v.created_at).toLocaleDateString()}</small>
+        </div>
+    `).join('');
+}
+
+// --- POSTING FUNCTIONS (ADMIN ONLY) ---
+
 document.getElementById('post-announcement-btn')?.addEventListener('click', async () => {
-    // 1. Get the currently logged-in user to grab their ID
     const { data: { user } } = await supabase.auth.getUser();
-    
     const text = document.getElementById('announcement-text').value;
     if (!text) return;
     
-    // 2. Insert BOTH the content AND the author_id (Fixed the 400 Error!)
-    const { error } = await supabase.from('announcements').insert([{ 
-        content: text, 
-        author_id: user.id 
-    }]);
+    const { error } = await supabase.from('announcements').insert([{ content: text, author_id: user.id }]);
 
-    if (error) {
-        console.error("Supabase Error:", error);
-        alert("Failed to post. Check the console for details.");
-    } else {
+    if (error) alert("Failed to post: " + error.message);
+    else {
         document.getElementById('announcement-text').value = '';
         loadAnnouncements();
     }
 });
 
 document.getElementById('post-meeting-btn')?.addEventListener('click', async () => {
-    // 1. Get the current user here too
     const { data: { user } } = await supabase.auth.getUser();
-
     const title = document.getElementById('meeting-title').value;
     const time = document.getElementById('meeting-time').value;
     const link = document.getElementById('meeting-link').value;
     
     if (!title || !time || !link) return alert("Please fill all meeting fields");
     
-    // 2. Insert the meeting details, including the author_id
-    const { error } = await supabase.from('meetings').insert([{ 
-        title: title, 
-        schedule: time, 
-        link: link,
-        author_id: user.id
-    }]);
+    const { error } = await supabase.from('meetings').insert([{ title: title, schedule: time, link: link, author_id: user.id }]);
 
-    if (error) {
-        console.error("Supabase Error:", error);
-        alert("Failed to post meeting. Check the console for details.");
-    } else {
+    if (error) alert("Failed to post meeting: " + error.message);
+    else {
         document.getElementById('meeting-title').value = '';
         document.getElementById('meeting-time').value = '';
         document.getElementById('meeting-link').value = '';
@@ -134,6 +143,27 @@ document.getElementById('post-meeting-btn')?.addEventListener('click', async () 
     }
 });
 
+document.getElementById('post-video-btn')?.addEventListener('click', async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const title = document.getElementById('video-title').value;
+    const url = document.getElementById('video-url').value;
+    
+    if (!title || !url) return alert("Please fill all video fields");
+
+    // Grab the professor's name
+    const authorName = user.user_metadata?.full_name || "Admin";
+
+    const { error } = await supabase.from('videos').insert([{ title: title, video_url: url, author_name: authorName }]);
+
+    if (error) alert("Failed to post video: " + error.message);
+    else {
+        document.getElementById('video-title').value = '';
+        document.getElementById('video-url').value = '';
+        loadVideos();
+    }
+});
+
+// --- LOGOUT LOGIC ---
 document.getElementById('logout-btn')?.addEventListener('click', async () => {
     await supabase.auth.signOut();
     window.location.replace('index.html');

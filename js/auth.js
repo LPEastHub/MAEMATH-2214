@@ -10,7 +10,7 @@ const showRegisterBtn = document.getElementById('show-register');
 const showLoginBtn = document.getElementById('show-login');
 const loginForm = document.getElementById('login-form');
 const registerForm = document.getElementById('register-form');
-const authMessage = document.getElementById('auth-message'); // Fixed typo here!
+const authMessage = document.getElementById('auth-message'); 
 
 // --- UI TOGGLE LOGIC ---
 
@@ -34,7 +34,7 @@ function displayMessage(text, isError = false) {
     authMessage.style.color = isError ? '#d9534f' : '#5cb85c'; // Red for error, Green for success
 }
 
-// --- SUPABASE REGISTRATION LOGIC (With Whitelist Check) ---
+// --- SUPABASE REGISTRATION LOGIC (With Whitelist & Duplicate Check) ---
 
 registerForm.addEventListener('submit', async (e) => {
     e.preventDefault(); // Stop the page from refreshing
@@ -47,7 +47,7 @@ registerForm.addEventListener('submit', async (e) => {
     displayMessage('Verifying name against official class list...', false);
 
     try {
-        // Step 1: Check if the name exists in the allowed_students table
+        // Step 1: Check if the name exists in the allowed_students table (Whitelist)
         const { data: allowedUser, error: checkError } = await supabase
             .from('allowed_students')
             .select('full_name')
@@ -60,7 +60,21 @@ registerForm.addEventListener('submit', async (e) => {
             return; // Stop the function here
         }
 
-        // Step 2: If the name is valid, proceed with Supabase Sign Up
+        // --- NEW: Step 1.5: Check if this name is ALREADY registered in profiles ---
+        displayMessage('Checking for duplicate accounts...', false);
+        const { data: existingUser, error: duplicateError } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .ilike('full_name', fullName)
+            .maybeSingle();
+
+        if (existingUser) {
+            displayMessage('❌ Registration Denied: This Official Name is already registered! If this is a mistake, contact the administrator.', true);
+            return; // Stop the function here so they can't make a duplicate
+        }
+        // --------------------------------------------------------------------------
+
+        // Step 2: If the name is valid AND not a duplicate, proceed with Supabase Sign Up
         displayMessage('Name verified! Creating account...', false);
         const { data, error } = await supabase.auth.signUp({
             email: email,

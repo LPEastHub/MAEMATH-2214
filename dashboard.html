@@ -3,65 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - MAEMATH 2214</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script type="module" src="js/guard.js"></script>
+    <title>Class Portal Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .container { display: flex; gap: 20px; flex-wrap: wrap; }
+        .column { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h2 { margin-top: 0; color: #2b6cb0; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; }
+        
+        /* Form Inputs */
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e0; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        button { background: #2b6cb0; color: #fff; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
+        button:hover { background: #2c5282; }
+        .logout-btn { background: #e53e3e; width: auto; }
+        .logout-btn:hover { background: #c53030; }
+
+        /* Admin Boxes hidden by default */
+        .admin-box { display: none; background: #fffaf0; border: 1px solid #feebc8; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .admin-box h3 { margin-top: 0; color: #dd6b20; font-size: 1rem; }
+    </style>
 </head>
-<body class="dashboard-body">
+<body>
 
-   <nav class="navbar">
-    <div class="nav-brand">MAEMATH 2214</div>
-    <ul class="nav-links">
-        <li><a href="dashboard.html" class="active">Dashboard</a></li>
-        <li><a href="materials.html">Materials</a></li>
-        <li><a href="reports.html">Reports</a></li>
-        <li><a href="chat.html">Chat</a></li> 
-    </ul>
-    <button id="logout-btn" class="btn-outline">Logout</button>
-    </nav>
+    <div class="header">
+        <h1 style="margin: 0; font-size: 1.5rem; color: #2d3748;">Class Portal</h1>
+        <div>
+            Welcome, <span id="user-email-display" style="font-weight: bold; color: #2b6cb0;">Student</span>!
+            <button id="logout-btn" class="logout-btn" style="margin-left: 15px;">Logout</button>
+        </div>
+    </div>
 
-    <main class="dashboard-container">
-        <header class="page-header">
-    <h1>Welcome back, <span id="user-email-display">Student</span>! 👋</h1>
-    <p>Here is your class overview for today.</p>
-</header>
-
-        <div class="dashboard-grid">
+    <div class="container">
+        <div class="column" style="flex: 2;">
             
-            <section class="card">
-                <div class="card-header" style="background-color: #2b6cb0; color: white;">
-                    <h2>📢 Class Announcements</h2>
-                </div>
-                <div class="card-content">
-                    <div id="admin-announcement-box" style="display: none; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px dashed #e2e8f0;">
-                        <textarea id="announcement-text" rows="3" placeholder="Post a new announcement..." style="width: 100%; margin-bottom: 10px;"></textarea>
-                        <button id="post-announcement-btn" class="btn primary-btn">Post Announcement</button>
-                    </div>
-                    
-                    <div id="announcements-container">Loading...</div>
-                </div>
-            </section>
+            <div class="card">
+                <h2>📢 Announcements</h2>
+                <div id="announcements-container">Loading announcements...</div>
+            </div>
 
-            <section class="card">
-                <div class="card-header" style="background-color: #38a169; color: white;">
-                    <h2>📅 Upcoming Meetings</h2>
-                </div>
-                <div class="card-content">
-                    <div id="admin-meeting-box" style="display: none; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px dashed #e2e8f0;">
-                        <input type="text" id="meeting-title" placeholder="Meeting Title (e.g., Midterm Review)" style="margin-bottom: 10px; width: 100%;">
-                        <input type="text" id="meeting-time" placeholder="Date & Time (e.g., Friday @ 6:00 PM)" style="margin-bottom: 10px; width: 100%;">
-                        <input type="text" id="meeting-link" placeholder="Zoom/Meet Link" style="margin-bottom: 10px; width: 100%;">
-                        <button id="post-meeting-btn" class="btn primary-btn" style="background-color: #38a169;">Post Meeting</button>
-                    </div>
-
-                    <div id="meetings-container">Loading...</div>
-                </div>
-            </section>
+            <div class="card">
+                <h2>🎥 Class Videos</h2>
+                <div id="videos-container">Loading videos...</div>
+            </div>
 
         </div>
-    </main>
+
+        <div class="column" style="flex: 1;">
+            
+            <div class="card">
+                <h2>📅 Upcoming Meetings</h2>
+                <div id="meetings-container">Loading meetings...</div>
+            </div>
+
+            <div class="card" id="admin-panel" style="display: none; background: #f7fafc; border: 2px dashed #cbd5e0;">
+                <h2 style="color: #4a5568;">⚙️ Professor Tools</h2>
+                
+                <div class="admin-box" id="admin-announcement-box">
+                    <h3>Post Announcement</h3>
+                    <textarea id="announcement-text" rows="4" placeholder="Type announcement here..."></textarea>
+                    <button id="post-announcement-btn">Post Announcement</button>
+                </div>
+
+                <div class="admin-box" id="admin-meeting-box">
+                    <h3>Schedule Meeting</h3>
+                    <input type="text" id="meeting-title" placeholder="Meeting Title">
+                    <input type="text" id="meeting-time" placeholder="Date & Time (e.g., Friday 10:00 AM)">
+                    <input type="url" id="meeting-link" placeholder="Meeting Link (Zoom/Meet)">
+                    <button id="post-meeting-btn">Post Meeting</button>
+                </div>
+
+                <div class="admin-box" id="admin-video-box">
+                    <h3>Share Video</h3>
+                    <input type="text" id="video-title" placeholder="Video Title">
+                    <input type="url" id="video-url" placeholder="Video Link (YouTube/Drive)">
+                    <button id="post-video-btn">Post Video</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
 
     <script type="module" src="js/dashboard.js"></script>
-    <script src="js/footer.js"></script>
 </body>
 </html>
