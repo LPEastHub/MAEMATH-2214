@@ -106,19 +106,22 @@ async function loadGroups() {
 
                             ${memberSub ? `
                                 <p style="font-size: 0.85rem; color: #2f855a; margin-bottom: 10px;"><strong>✅ Topic:</strong> ${memberSub.sub_topic}</p>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                    <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #c6f6d5;">
-                                        <strong>📝 Description:</strong><br><span style="font-size: 0.8rem;">${memberSub.description}</span>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    
+                                    <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #c6f6d5; max-height: 120px; overflow-y: auto;">
+                                        <strong style="display: block; margin-bottom: 5px; color: #2f855a;">📝 Description:</strong>
+                                        <span style="font-size: 0.85rem; color: #4a5568; line-height: 1.5; display: block; white-space: pre-wrap;">${memberSub.description}</span>
                                     </div>
-                                    <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #c6f6d5; display: flex; flex-direction: column; gap: 5px; align-items: center; justify-content: center;">
-                                        <a href="${memberSub.file_url}" target="_blank" download class="btn primary-btn" style="text-decoration: none; width: 100%; text-align: center; font-size: 0.85rem;">📂 Download</a>
+
+                                    <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #c6f6d5; display: flex; gap: 10px; align-items: center;">
+                                        <a href="${memberSub.file_url}" target="_blank" download class="btn primary-btn" style="text-decoration: none; flex: 2; text-align: center; font-size: 0.85rem; padding: 8px;">📂 Download File</a>
                                         
-                                        <div style="display: flex; gap: 5px; width: 100%;">
-                                            ${isOwnerOrAdmin ? `
-                                                <button onclick="openEditModal('${memberSub.id}', '${member.name}', ${group.number}, '${memberSub.sub_topic.replace(/'/g, "\\'")}', '${memberSub.description.replace(/'/g, "\\'")}')" class="btn-outline" style="flex: 1; font-size: 0.75rem; padding: 5px;">✏️ Edit</button>
-                                                <button onclick="deleteReport('${memberSub.id}')" class="btn-outline" style="flex: 1; font-size: 0.75rem; padding: 5px; border-color: #e53e3e; color: #e53e3e;">🗑️ Delete</button>
-                                            ` : ''}
-                                        </div>
+                                        ${isOwnerOrAdmin ? `
+                                            <div style="display: flex; gap: 5px; flex: 1;">
+                                                <button onclick="openEditModal('${memberSub.id}', '${member.name}', ${group.number}, '${memberSub.sub_topic.replace(/'/g, "\\'")}', '${memberSub.description.replace(/'/g, "\\'")}')" class="btn-outline" style="flex: 1; font-size: 0.75rem; padding: 8px;">✏️ Edit</button>
+                                                <button onclick="deleteReport('${memberSub.id}')" class="btn-outline" style="flex: 1; font-size: 0.75rem; padding: 8px; border-color: #e53e3e; color: #e53e3e;">🗑️ Delete</button>
+                                            </div>
+                                        ` : ''}
                                     </div>
                                 </div>
                             ` : `
@@ -277,4 +280,3 @@ document.getElementById('logout-btn')?.addEventListener('click', async () => {
     await supabase.auth.signOut();
     window.location.replace('index.html');
 });
-
