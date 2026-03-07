@@ -61,12 +61,12 @@ async function loadAnnouncements() {
     const { data } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
     
     if (!data || data.length === 0) {
-        announcementsContainer.innerHTML = '<p style="color: gray;">No announcements yet.</p>';
+        if(announcementsContainer) announcementsContainer.innerHTML = '<p style="color: gray;">No announcements yet.</p>';
         return;
     }
     
     // Using white-space: pre-wrap to keep paragraph spaces and indentations!
-    announcementsContainer.innerHTML = data.map(a => `
+    if(announcementsContainer) announcementsContainer.innerHTML = data.map(a => `
         <div style="background: #ebf8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3182ce; margin-bottom: 15px;">
             <p style="margin: 0; color: #1a365d; white-space: pre-wrap; font-family: inherit; line-height: 1.5;">${a.content}</p>
             <small style="color: #718096; font-size: 0.8rem; display: block; margin-top: 10px;">Posted: ${new Date(a.created_at).toLocaleDateString()}</small>
@@ -78,11 +78,11 @@ async function loadMeetings() {
     const { data } = await supabase.from('meetings').select('*').order('created_at', { ascending: false });
     
     if (!data || data.length === 0) {
-        meetingsContainer.innerHTML = '<p style="color: gray;">No scheduled meetings.</p>';
+        if(meetingsContainer) meetingsContainer.innerHTML = '<p style="color: gray;">No scheduled meetings.</p>';
         return;
     }
 
-    meetingsContainer.innerHTML = data.map(m => `
+    if(meetingsContainer) meetingsContainer.innerHTML = data.map(m => `
         <div style="background: #f0fff4; padding: 15px; border-radius: 8px; border-left: 4px solid #38a169; margin-bottom: 15px;">
             <h3 style="margin: 0 0 5px 0; color: #22543d;">${m.title}</h3>
             <p style="margin: 0 0 10px 0; color: #2f855a; font-weight: bold;">⏰ ${m.schedule}</p>
@@ -91,7 +91,45 @@ async function loadMeetings() {
     `).join('');
 }
 
+// --- NEW & IMPROVED VIDEO HELPER FUNCTION ---
+function getEmbedUrl(url) {
+    if (!url) return '';
+    
+    try {
+        let embedUrl = url;
+        
+        // 1. YouTube standard
+        if (url.includes('youtube.com/watch')) {
+            const videoId = url.split('v=')[1].split('&')[0];
+            embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        } 
+        // 2. YouTube short
+        else if (url.includes('youtu.be/')) {
+            const videoId = url.split('youtu.be/')[1].split('?')[0];
+            embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        }
+        // 3. YouTube Shorts
+        else if (url.includes('youtube.com/shorts/')) {
+            const videoId = url.split('shorts/')[1].split('?')[0];
+            embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        }
+        // 4. ANY Google Drive or Google Docs Video Link
+        else if (url.includes('google.com') && url.includes('/d/')) {
+            // This grabs the ID directly between "/d/" and the next "/"
+            const videoId = url.split('/d/')[1].split('/')[0];
+            // Forces it into Google's universal preview player
+            embedUrl = `https://drive.google.com/file/d/${videoId}/preview`;
+        }
+        
+        return embedUrl;
+    } catch (e) {
+        return url; // If parsing fails, return original link
+    }
+}
+
 async function loadVideos() {
+    if (!videosContainer) return;
+
     const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
 
     if (!data || data.length === 0) {
@@ -99,13 +137,35 @@ async function loadVideos() {
         return;
     }
 
-    videosContainer.innerHTML = data.map(v => `
-        <div style="border-left: 4px solid #805ad5; padding-left: 15px; margin-bottom: 20px; background-color: #faf5ff; padding: 15px; border-radius: 8px;">
-            <strong style="font-size: 1.1em; color: #44337a;">${v.title}</strong><br>
-            <a href="${v.video_url}" target="_blank" style="color: #6b46c1; font-weight: bold; text-decoration: none; display: inline-block; margin: 10px 0;">🔗 Click here to watch</a><br>
-            <small style="color: #718096;">Posted by ${v.author_name} on ${new Date(v.created_at).toLocaleDateString()}</small>
-        </div>
-    `).join('');
+    videosContainer.innerHTML = data.map(v => {
+        const embedUrl = getEmbedUrl(v.video_url);
+        let mediaContent = '';
+        
+        // Check if the link successfully converted into an embeddable format
+        if (embedUrl.includes('youtube.com/embed') || embedUrl.includes('/preview')) {
+            mediaContent = `
+                <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px; margin: 15px 0; background: #000;">
+                    <iframe src="${embedUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allowfullscreen></iframe>
+                </div>
+            `;
+        } else {
+            mediaContent = `
+                <div style="background: #e9d8fd; padding: 10px; border-radius: 6px; margin: 10px 0; display: inline-block;">
+                    <a href="${v.video_url}" target="_blank" style="color: #553c9a; font-weight: bold; text-decoration: none;">
+                        🔗 Click here to open video link
+                    </a>
+                </div>
+            `;
+        }
+
+        return `
+            <div style="border-left: 4px solid #805ad5; margin-bottom: 20px; background-color: #faf5ff; padding: 15px; border-radius: 8px;">
+                <strong style="font-size: 1.1em; color: #44337a; display: block;">${v.title}</strong>
+                ${mediaContent}
+                <small style="color: #718096; display: block; margin-top: 5px;">Posted by ${v.author_name} on ${new Date(v.created_at).toLocaleDateString()}</small>
+            </div>
+        `;
+    }).join('');
 }
 
 // --- POSTING FUNCTIONS (ADMIN ONLY) ---
@@ -150,7 +210,6 @@ document.getElementById('post-video-btn')?.addEventListener('click', async () =>
     
     if (!title || !url) return alert("Please fill all video fields");
 
-    // Grab the professor's name
     const authorName = user.user_metadata?.full_name || "Admin";
 
     const { error } = await supabase.from('videos').insert([{ title: title, video_url: url, author_name: authorName }]);
